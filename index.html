@@ -3,61 +3,116 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Video List with Navigation</title>
+<title>TikTok Style Video Player</title>
 <style>
   body {
     margin: 0;
-    background-color: #111;
-    font-family: Arial, sans-serif;
+    background-color: #000;
+    font-family: 'Arial', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  /* Video display area */
-  .video-container {
+  /* Navigation arrows on the sides */
+  .nav-arrows {
+    position: fixed;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    transform: translateY(-50%);
+    z-index: 10;
+  }
+
+  .arrow-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    font-size: 30px;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .arrow-btn:hover {
+    background: rgba(255,255,255,0.4);
+  }
+
+  /* Video container in center with portrait aspect ratio */
+  .video-wrapper {
     position: relative;
-    width: 90%;
+    width: 100%;
     max-width: 400px;
-    aspect-ratio: 9/16;
-    margin-top: 20px;
+    aspect-ratio: 9/16; /* portrait mode */
+    margin-top: 60px; /* space for arrows */
   }
 
   video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 8px;
   }
 
-  /* Navigation arrows (left and right) */
-  .nav-arrows {
+  /* Overlay info at bottom */
+  .bottom-info {
     position: absolute;
-    top: 50%;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px;
-    transform: translateY(-50%);
-    z-index: 3;
+    bottom: 15px;
+    left: 15px;
+    right: 70px; /* leave space for buttons */
+    color: #fff;
+    z-index: 5;
   }
 
-  .arrow-btn {
-    background-color: #555; /* greyish-black theme */
-    color: #fff;
+  .username {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .caption {
+    font-size: 14px;
+  }
+
+  /* Vertical action buttons on the right side */
+  .actions {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 10;
+  }
+
+  .action-btn {
+    background: rgba(255,255,255,0.2);
     border: none;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     font-size: 30px;
+    color: #fff;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background 0.3s;
   }
 
-  .arrow-btn:hover {
-    background-color: #777;
+  .action-btn:hover {
+    background: rgba(255,255,255,0.4);
   }
 
-  /* Table listing videos */
+  /* Video list table styling */
+  h2 {
+    margin-top: 30px;
+    color: #fff;
+  }
+
   table {
     width: 90%;
     max-width: 800px;
@@ -79,60 +134,39 @@
     background-color: #333;
     cursor: pointer;
   }
-
-  /* Bottom info overlay with gradient for readability */
-  .bottom-info-background {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-    pointer-events: none;
-  }
-
-  .bottom-info {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 70px;
-    color: #fff;
-    font-size: 14px;
-    z-index: 2;
-  }
-
-  .username {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 4px;
-  }
 </style>
 </head>
 <body>
 
-<!-- Navigation arrows for previous/next -->
+<!-- Navigation arrows -->
 <div class="nav-arrows">
-  <button id="prevBtn" class="arrow-btn" title="Previous Video">⬅️</button>
-  <button id="nextBtn" class="arrow-btn" title="Next Video">➡️</button>
+  <button id="prevBtn" class="arrow-btn" title="Previous">⬅️</button>
+  <button id="nextBtn" class="arrow-btn" title="Next">➡️</button>
 </div>
 
 <!-- Video display -->
-<div class="video-container">
+<div class="video-wrapper">
   <video id="mainVideo" controls autoplay muted loop>
     <source src="" type="video/mp4" />
     Your browser does not support HTML5 video.
   </video>
-  <!-- Bottom overlay with info -->
-  <div class="bottom-info-background"></div>
-  <div class="bottom-info">
+  <!-- Action buttons -->
+  <div class="actions">
+    <button class="action-btn" title="Like">❤️</button>
+    <button class="action-btn" title="Comment">💬</button>
+    <button class="action-btn" title="Share">🔗</button>
+    <button class="action-btn" title="More">⋮</button>
+  </div>
+  <!-- Info overlay -->
+  <div class="bottom-info" id="videoInfo">
     <div class="username" id="videoTitle">Title</div>
-    <div id="videoDescription">Description</div>
-    <div>Likes: <span id="likeCount">0</span> | Comments: <span id="commentCount">0</span></div>
+    <div class="caption" id="videoDescription">Description</div>
+    <div style="font-size:12px;">Likes: <span id="likeCount">0</span> | Comments: <span id="commentCount">0</span></div>
   </div>
 </div>
 
 <!-- Video list table -->
-<h2 style="margin-top:20px; color:#fff;">Video List</h2>
+<h2 style="color:#fff;">Video List</h2>
 <table id="videoTable">
   <thead>
     <tr>
@@ -146,7 +180,7 @@
 </table>
 
 <script>
-  // Array of videos with info
+  // List of videos with info
   const videos = [
     {
       url: "https://www.w3schools.com/html/mov_bbb.mp4",
@@ -204,10 +238,11 @@
     mainVideo.load();
     mainVideo.play();
     // Update info display
-    titleEl.textContent = v.title;
-    descEl.textContent = v.description;
+    document.getElementById('videoTitle').textContent = v.title;
+    document.getElementById('videoDescription').textContent = v.description;
     likeEl.textContent = v.likes;
     commentEl.textContent = v.comments;
+
     // Highlight selected row
     document.querySelectorAll("#videoTable tr").forEach((row, idx) => {
       row.classList.toggle("selected", idx === currentIndex);
