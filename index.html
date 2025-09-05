@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Video List Table System</title>
+<title>Video List with Navigation</title>
 <style>
   body {
     margin: 0;
@@ -29,7 +29,35 @@
     object-fit: cover;
   }
 
-  /* Table system */
+  /* Navigation arrows (left and right) */
+  .nav-arrows {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    transform: translateY(-50%);
+    z-index: 3;
+  }
+
+  .arrow-btn {
+    background-color: #555; /* greyish-black theme */
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .arrow-btn:hover {
+    background-color: #777;
+  }
+
+  /* Table listing videos */
   table {
     width: 90%;
     max-width: 800px;
@@ -52,21 +80,41 @@
     cursor: pointer;
   }
 
-  /* Styling for the UI */
-  h2 {
-    margin-top: 30px;
-    color: #fff;
+  /* Bottom info overlay with gradient for readability */
+  .bottom-info-background {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    pointer-events: none;
   }
 
-  /* Optional: Style for selected row */
-  .selected {
-    background-color: #555;
+  .bottom-info {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 70px;
+    color: #fff;
+    font-size: 14px;
+    z-index: 2;
+  }
+
+  .username {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
   }
 </style>
 </head>
 <body>
 
-<h2>Select a Video</h2>
+<!-- Navigation arrows for previous/next -->
+<div class="nav-arrows">
+  <button id="prevBtn" class="arrow-btn" title="Previous Video">⬅️</button>
+  <button id="nextBtn" class="arrow-btn" title="Next Video">➡️</button>
+</div>
 
 <!-- Video display -->
 <div class="video-container">
@@ -74,9 +122,17 @@
     <source src="" type="video/mp4" />
     Your browser does not support HTML5 video.
   </video>
+  <!-- Bottom overlay with info -->
+  <div class="bottom-info-background"></div>
+  <div class="bottom-info">
+    <div class="username" id="videoTitle">Title</div>
+    <div id="videoDescription">Description</div>
+    <div>Likes: <span id="likeCount">0</span> | Comments: <span id="commentCount">0</span></div>
+  </div>
 </div>
 
-<!-- Table List -->
+<!-- Video list table -->
+<h2 style="margin-top:20px; color:#fff;">Video List</h2>
 <table id="videoTable">
   <thead>
     <tr>
@@ -86,13 +142,11 @@
       <th>Comments</th>
     </tr>
   </thead>
-  <tbody>
-    <!-- Rows will be generated here -->
-  </tbody>
+  <tbody></tbody>
 </table>
 
 <script>
-  // Array of video objects with info
+  // Array of videos with info
   const videos = [
     {
       url: "https://www.w3schools.com/html/mov_bbb.mp4",
@@ -117,10 +171,17 @@
     }
   ];
 
-  const tbody = document.querySelector("#videoTable tbody");
-  const mainVideo = document.getElementById("mainVideo");
+  let currentIndex = 0;
+
+  const mainVideo = document.getElementById('mainVideo');
   const source = mainVideo.querySelector("source");
-  
+  const titleEl = document.getElementById('videoTitle');
+  const descEl = document.getElementById('videoDescription');
+  const likeEl = document.getElementById('likeCount');
+  const commentEl = document.getElementById('commentCount');
+
+  const tbody = document.querySelector("#videoTable tbody");
+
   // Generate table rows
   videos.forEach((video, index) => {
     const row = document.createElement("tr");
@@ -131,22 +192,40 @@
       <td>${video.comments}</td>
     `;
     row.addEventListener("click", () => {
-      // Update video source
-      source.src = video.url;
-      mainVideo.load();
-      mainVideo.play();
-
-      // Highlight selected row
-      document.querySelectorAll("#videoTable tr").forEach(r => r.classList.remove("selected"));
-      row.classList.add("selected");
+      currentIndex = index;
+      updateVideo();
     });
     tbody.appendChild(row);
   });
 
-  // Optionally, auto-select the first video
+  const updateVideo = () => {
+    const v = videos[currentIndex];
+    source.src = v.url;
+    mainVideo.load();
+    mainVideo.play();
+    // Update info display
+    titleEl.textContent = v.title;
+    descEl.textContent = v.description;
+    likeEl.textContent = v.likes;
+    commentEl.textContent = v.comments;
+    // Highlight selected row
+    document.querySelectorAll("#videoTable tr").forEach((row, idx) => {
+      row.classList.toggle("selected", idx === currentIndex);
+    });
+  };
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+    updateVideo();
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % videos.length;
+    updateVideo();
+  });
+
+  // Initialize with first video
   if (videos.length > 0) {
-    // Trigger click on first row
-    tbody.querySelector("tr").click();
+    updateVideo();
   }
 </script>
 
