@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YouTube-like UI</title>
+<style>
+  body {
+    margin: 0;
+    background-color: #000;
+    font-family: Arial, sans-serif;
+    display: flex;
+  }
+  /* Sidebar styles */
+  .sidebar {
+    width: 60px;
+    background-color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+  }
+  .sidebar a {
+    margin: 20px 0;
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+  }
+  /* Main content styles */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+  /* Video container */
+  .video-container {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+  }
+  video {
+    width: 100%;
+    height: auto;
+    background-color: #000;
+  }
+  /* Actions overlay */
+  .actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  .actions button {
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: #fff;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  /* Video info and interactions */
+  .video-info {
+    width: 100%;
+    max-width: 720px;
+    background-color: #222;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .channel-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #555; /* Placeholder for channel image */
+  }
+  .video-details {
+    flex: 1;
+  }
+  .subscribe {
+    background-color: #cc0000;
+    color: #fff;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  /* Comments section */
+  .comments {
+    width: 100%;
+    max-width: 720px;
+    background-color: #222;
+    margin-top: 10px;
+    padding: 10px;
+  }
+</style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a title="Home" href="#">🏠</a>
+    <a title="Shorts" href="#">🎬</a>
+    <a title="Subscriptions" href="#">📺</a>
+    <a title="Library" href="#">📚</a>
+    <a title="Downloads" href="#">⬇️</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <!-- Video Section -->
+    <div class="video-container">
+      <video controls>
+        <!-- Change the src to your video URL -->
+        <source src="your-video-file.mp4" type="video/mp4" />
+        Your browser does not support HTML5 video.
+      </video>
+      <!-- Action buttons overlay -->
+      <div class="actions">
+        <button title="Play">▶️</button>
+        <button title="Mute">🔇</button>
+        <button title="More options">⋮</button>
+      </div>
+    </div>
+
+    <!-- Video Info & Interaction -->
+    <div class="video-info">
+      <div class="channel-img"></div>
+      <div class="video-details">
+        <div><strong>@clipsoftantes</strong></div>
+        <button class="subscribe">Subscribe</button>
+        <div>Dantes Got The WORST Possible</div>
+        <div>Dantes Couldn't Believe His Eyes 😮</div>
+      </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments">
+      <p><strong>Comments</strong></p>
+      <p>Sample comment...</p>
+    </div>
+  </div>
+</body>
+</html>
