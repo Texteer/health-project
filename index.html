@@ -3,177 +3,150 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube Shorts UI with Scroll</title>
+<title>Video List Table System</title>
 <style>
   body {
     margin: 0;
-    background-color: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    background-color: #111;
     font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  /* Container to hold the portrait video in the center */
-  .video-wrapper {
+  /* Video display area */
+  .video-container {
     position: relative;
-    width: 100%;
-    max-width: 400px; /* Adjust as needed for size */
-    aspect-ratio: 9 / 16; /* Portrait aspect ratio */
-    background-color: #000;
+    width: 90%;
+    max-width: 400px;
+    aspect-ratio: 9/16;
+    margin-top: 20px;
   }
 
-  /* Make the video fill the wrapper with object-fit */
   video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
   }
 
-  /* Controls on the right side, vertical (like in Shorts) */
-  .controls {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    z-index: 3;
-  }
-
-  .control-btn {
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
+  /* Table system */
+  table {
+    width: 90%;
+    max-width: 800px;
+    margin-top: 20px;
+    border-collapse: collapse;
     color: #fff;
-    font-size: 24px;
+  }
+
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid #444;
+  }
+
+  th {
+    background-color: #222;
+  }
+
+  tr:hover {
+    background-color: #333;
     cursor: pointer;
   }
 
-  /* Up/Down arrow buttons at the top or bottom for scrolling videos */
-  .scroll-buttons {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 3;
-  }
-
-  .scroll-btn {
-    background: rgba(0,0,0,0.5);
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+  /* Styling for the UI */
+  h2 {
+    margin-top: 30px;
     color: #fff;
-    cursor: pointer;
   }
 
-  /* Bottom info overlay with gradient background for readability */
-  .bottom-info-background {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-    pointer-events: none;
-  }
-
-  .bottom-info {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 70px; /* leave space for controls */
-    color: #fff;
-    font-size: 14px;
-    z-index: 2;
-  }
-
-  .username {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 4px;
-  }
-
-  /* Optional: add some padding or styling to captions */
-  .caption {
-    margin-top: 2px;
+  /* Optional: Style for selected row */
+  .selected {
+    background-color: #555;
   }
 </style>
 </head>
 <body>
 
-<!-- Scroll Up/Down buttons -->
-<div class="scroll-buttons">
-  <button class="scroll-btn" id="upBtn" title="Previous Video">⬆️</button>
-  <button class="scroll-btn" id="downBtn" title="Next Video">⬇️</button>
-</div>
+<h2>Select a Video</h2>
 
-<div class="video-wrapper">
-  <!-- Video in portrait aspect ratio -->
-  <video id="videoPlayer" controls autoplay muted loop>
-    <!-- Replace src with your initial video URL -->
-    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+<!-- Video display -->
+<div class="video-container">
+  <video id="mainVideo" controls autoplay muted loop>
+    <source src="" type="video/mp4" />
     Your browser does not support HTML5 video.
   </video>
-
-  <!-- Vertical controls -->
-  <div class="controls">
-    <button class="control-btn" title="Like">👍</button>
-    <button class="control-btn" title="Comment">💬</button>
-    <button class="control-btn" title="Share">🔗</button>
-    <button class="control-btn" title="More options">⋮</button>
-  </div>
-
-  <!-- Bottom info overlay -->
-  <div class="bottom-info-background"></div>
-  <div class="bottom-info">
-    <div class="username">@clipsoftantes</div>
-    <div class="caption">Dantes Got The WORST Possible</div>
-    <div class="caption">Dantes Couldn't Believe His Eyes 😮</div>
-  </div>
 </div>
 
+<!-- Table List -->
+<table id="videoTable">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Likes</th>
+      <th>Comments</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows will be generated here -->
+  </tbody>
+</table>
+
 <script>
-  // List of video URLs to cycle through
+  // Array of video objects with info
   const videos = [
-    "https://www.w3schools.com/html/mov_bbb.mp4",
-    "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-    "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" // Replace with your videos
+    {
+      url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      title: "Dantes' Worst Day",
+      description: "Dantes got the worst day 😮",
+      likes: 123,
+      comments: 45
+    },
+    {
+      url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+      title: "Bunny's Adventure",
+      description: "Big Bunny in the wild!",
+      likes: 456,
+      comments: 78
+    },
+    {
+      url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+      title: "Another Bunny Video",
+      description: "Bunny doing funny stuff!",
+      likes: 789,
+      comments: 101
+    }
   ];
 
-  let currentIndex = 0;
+  const tbody = document.querySelector("#videoTable tbody");
+  const mainVideo = document.getElementById("mainVideo");
+  const source = mainVideo.querySelector("source");
+  
+  // Generate table rows
+  videos.forEach((video, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${video.title}</td>
+      <td>${video.description}</td>
+      <td>${video.likes}</td>
+      <td>${video.comments}</td>
+    `;
+    row.addEventListener("click", () => {
+      // Update video source
+      source.src = video.url;
+      mainVideo.load();
+      mainVideo.play();
 
-  const videoElement = document.getElementById('videoPlayer');
-
-  document.getElementById('upBtn').addEventListener('click', () => {
-    // Go to previous video
-    currentIndex = (currentIndex - 1 + videos.length) % videos.length;
-    changeVideo();
+      // Highlight selected row
+      document.querySelectorAll("#videoTable tr").forEach(r => r.classList.remove("selected"));
+      row.classList.add("selected");
+    });
+    tbody.appendChild(row);
   });
 
-  document.getElementById('downBtn').addEventListener('click', () => {
-    // Go to next video
-    currentIndex = (currentIndex + 1) % videos.length;
-    changeVideo();
-  });
-
-  function changeVideo() {
-    // Change the video source
-    const newSource = videos[currentIndex];
-    videoElement.src = newSource;
-    videoElement.play();
+  // Optionally, auto-select the first video
+  if (videos.length > 0) {
+    // Trigger click on first row
+    tbody.querySelector("tr").click();
   }
 </script>
 
