@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube Shorts UI in Portrait Mode</title>
+<title>YouTube Shorts UI with Scroll</title>
 <style>
   body {
     margin: 0;
@@ -33,7 +33,7 @@
     display: block;
   }
 
-  /* Controls on the right side, vertical */
+  /* Controls on the right side, vertical (like in Shorts) */
   .controls {
     position: absolute;
     right: 10px;
@@ -43,6 +43,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    z-index: 3;
   }
 
   .control-btn {
@@ -56,6 +57,28 @@
     cursor: pointer;
   }
 
+  /* Up/Down arrow buttons at the top or bottom for scrolling videos */
+  .scroll-buttons {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 3;
+  }
+
+  .scroll-btn {
+    background: rgba(0,0,0,0.5);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+  }
+
   /* Bottom info overlay with gradient background for readability */
   .bottom-info-background {
     position: absolute;
@@ -64,7 +87,7 @@
     right: 0;
     height: 80px;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-    pointer-events: none; /* so it doesn't block clicks */
+    pointer-events: none;
   }
 
   .bottom-info {
@@ -91,10 +114,16 @@
 </head>
 <body>
 
+<!-- Scroll Up/Down buttons -->
+<div class="scroll-buttons">
+  <button class="scroll-btn" id="upBtn" title="Previous Video">⬆️</button>
+  <button class="scroll-btn" id="downBtn" title="Next Video">⬇️</button>
+</div>
+
 <div class="video-wrapper">
   <!-- Video in portrait aspect ratio -->
-  <video controls autoplay muted loop>
-    <!-- Replace src with your video URL -->
+  <video id="videoPlayer" controls autoplay muted loop>
+    <!-- Replace src with your initial video URL -->
     <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
     Your browser does not support HTML5 video.
   </video>
@@ -115,6 +144,38 @@
     <div class="caption">Dantes Couldn't Believe His Eyes 😮</div>
   </div>
 </div>
+
+<script>
+  // List of video URLs to cycle through
+  const videos = [
+    "https://www.w3schools.com/html/mov_bbb.mp4",
+    "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+    "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" // Replace with your videos
+  ];
+
+  let currentIndex = 0;
+
+  const videoElement = document.getElementById('videoPlayer');
+
+  document.getElementById('upBtn').addEventListener('click', () => {
+    // Go to previous video
+    currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+    changeVideo();
+  });
+
+  document.getElementById('downBtn').addEventListener('click', () => {
+    // Go to next video
+    currentIndex = (currentIndex + 1) % videos.length;
+    changeVideo();
+  });
+
+  function changeVideo() {
+    // Change the video source
+    const newSource = videos[currentIndex];
+    videoElement.src = newSource;
+    videoElement.play();
+  }
+</script>
 
 </body>
 </html>
