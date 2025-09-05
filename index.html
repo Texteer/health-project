@@ -3,144 +3,110 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube-like UI</title>
+<title>YouTube Shorts UI</title>
 <style>
   body {
     margin: 0;
     background-color: #000;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
     font-family: Arial, sans-serif;
-    display: flex;
   }
-  /* Sidebar styles */
-  .sidebar {
-    width: 60px;
-    background-color: #222;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 10px;
-  }
-  .sidebar a {
-    margin: 20px 0;
-    color: #fff;
-    text-decoration: none;
-    font-size: 24px;
-  }
-  /* Main content styles */
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
-  /* Video container */
+
   .video-container {
+    flex: 1;
     position: relative;
-    width: 100%;
-    max-width: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+
+  /* Video element styles */
   video {
     width: 100%;
-    height: auto;
-    background-color: #000;
+    height: 100%;
+    object-fit: cover;
   }
-  /* Actions overlay */
-  .actions {
+
+  /* Right-side controls (vertical icons) */
+  .controls {
     position: absolute;
-    top: 10px;
     right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
-    gap: 10px;
-  }
-  .actions button {
-    background: rgba(0,0,0,0.6);
-    border: none;
-    color: #fff;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  /* Video info and interactions */
-  .video-info {
-    width: 100%;
-    max-width: 720px;
-    background-color: #222;
-    padding: 10px;
-    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
   }
-  .channel-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #555; /* Placeholder for channel image */
-  }
-  .video-details {
-    flex: 1;
-  }
-  .subscribe {
-    background-color: #cc0000;
-    color: #fff;
-    padding: 6px 12px;
+
+  .control-btn {
+    background: rgba(0, 0, 0, 0.5);
     border: none;
-    border-radius: 2px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    color: #fff;
+    font-size: 24px;
     cursor: pointer;
   }
-  /* Comments section */
-  .comments {
-    width: 100%;
-    max-width: 720px;
-    background-color: #222;
-    margin-top: 10px;
-    padding: 10px;
+
+  /* Bottom info overlay (like Shorts caption/title) */
+  .bottom-info {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    right: 70px; /* Leave space for controls */
+    color: #fff;
+    max-width: calc(100% - 80px);
+  }
+
+  .username {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .caption {
+    font-size: 14px;
+  }
+
+  /* Optional: Add a semi-transparent background for better text readability */
+  .bottom-info-background {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   }
 </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <a title="Home" href="#">🏠</a>
-    <a title="Shorts" href="#">🎬</a>
-    <a title="Subscriptions" href="#">📺</a>
-    <a title="Library" href="#">📚</a>
-    <a title="Downloads" href="#">⬇️</a>
+
+<div class="video-container">
+  <!-- Your video. Replace src with your video URL -->
+  <video controls autoplay muted loop>
+    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+    Your browser does not support HTML5 video.
+  </video>
+
+  <!-- Vertical controls on the right -->
+  <div class="controls">
+    <button class="control-btn" title="Like">👍</button>
+    <button class="control-btn" title="Comment">💬</button>
+    <button class="control-btn" title="Share">🔗</button>
+    <button class="control-btn" title="More options">⋮</button>
   </div>
 
-  <!-- Main Content -->
-  <div class="main">
-    <!-- Video Section -->
-    <div class="video-container">
-      <video controls>
-        <!-- Change the src to your video URL -->
-        <source src="your-video-file.mp4" type="video/mp4" />
-        Your browser does not support HTML5 video.
-      </video>
-      <!-- Action buttons overlay -->
-      <div class="actions">
-        <button title="Play">▶️</button>
-        <button title="Mute">🔇</button>
-        <button title="More options">⋮</button>
-      </div>
-    </div>
-
-    <!-- Video Info & Interaction -->
-    <div class="video-info">
-      <div class="channel-img"></div>
-      <div class="video-details">
-        <div><strong>@clipsoftantes</strong></div>
-        <button class="subscribe">Subscribe</button>
-        <div>Dantes Got The WORST Possible</div>
-        <div>Dantes Couldn't Believe His Eyes 😮</div>
-      </div>
-    </div>
-
-    <!-- Comments Section -->
-    <div class="comments">
-      <p><strong>Comments</strong></p>
-      <p>Sample comment...</p>
-    </div>
+  <!-- Bottom info overlay -->
+  <div class="bottom-info-background"></div>
+  <div class="bottom-info">
+    <div class="username">@clipsoftantes</div>
+    <div class="caption">Dantes Got The WORST Possible</div>
+    <div class="caption">Dantes Couldn't Believe His Eyes 😮</div>
   </div>
+</div>
+
 </body>
 </html>
