@@ -1,268 +1,215 @@
-<!DOCTYPE html>
+<!--
+YouTube-Shorts-Style.html (YouTube Shorts links version)
+Now supports direct YouTube Shorts links (https://youtube.com/shorts/...).
+Uses iframes instead of <video> tags.
+-->
+
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TikTok Style Video Player</title>
-<style>
-  body {
-    margin: 0;
-    background-color: #000;
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shorts-style viewer</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --muted:#bdbdbd;
+      --accent:#ff2d55;
+      --panel: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    .app{height:100%;display:grid;grid-template-columns:1fr 120px;align-items:center;justify-items:center}
 
-  /* Navigation arrows on the sides */
-  .nav-arrows {
-    position: fixed;
-    top: 50%;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-    transform: translateY(-50%);
-    z-index: 10;
-  }
+    /* center column */
+    .viewer{width:min(720px,100%);height:min(1280px,88vh);background:#000;border-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 
-  .arrow-btn {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    font-size: 30px;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
+    iframe{width:100%;height:100%;border:none;border-radius:12px;background:#000}
 
-  .arrow-btn:hover {
-    background: rgba(255,255,255,0.4);
-  }
+    .actions{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:18px;align-items:center}
+    .action-btn{display:flex;flex-direction:column;align-items:center;gap:6px;backdrop-filter: blur(6px);background:var(--panel);padding:10px;border-radius:12px;min-width:56px}
+    .action-btn button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:6px}
+    .action-btn .count{font-size:12px;color:var(--muted)}
 
-  /* Video container in center with portrait aspect ratio */
-  .video-wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    aspect-ratio: 9/16; /* portrait mode */
-    margin-top: 60px; /* space for arrows */
-  }
+    .navside{position:fixed;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px;align-items:center}
+    .nav-arrow{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .nav-arrow svg{width:20px;height:20px}
 
-  video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-  }
+    .meta{position:absolute;left:18px;bottom:22px;color:#fff;max-width:60%;text-shadow:0 4px 12px rgba(0,0,0,0.7)}
+    .meta h3{margin:0;font-size:18px}
+    .meta p{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-  /* Overlay info at bottom */
-  .bottom-info {
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
-    right: 70px; /* leave space for buttons */
-    color: #fff;
-    z-index: 5;
-  }
+    .modal{position:fixed;left:0;right:0;top:0;bottom:0;display:none;align-items:flex-end}
+    .modal.open{display:flex}
+    .modal .sheet{background:#070707;color:#fff;padding:16px;border-top-left-radius:14px;border-top-right-radius:14px;width:100%;max-height:70vh;overflow:auto}
+    .comments{display:flex;flex-direction:column;gap:10px}
+    .comment{padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
 
-  .username {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 4px;
-  }
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr}
+      .viewer{width:100%;height:100vh;border-radius:0}
+      .actions{right:12px}
+      .navside{right:4px}
+    }
 
-  .caption {
-    font-size: 14px;
-  }
+    .like-anim{transform-origin:center;animation:likepop .45s forwards}
+    @keyframes likepop{0%{transform:scale(1)}50%{transform:scale(1.45)}100%{transform:scale(1)}}
 
-  /* Vertical action buttons on the right side */
-  .actions {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    z-index: 10;
-  }
-
-  .action-btn {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    font-size: 30px;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-
-  .action-btn:hover {
-    background: rgba(255,255,255,0.4);
-  }
-
-  /* Video list table styling */
-  h2 {
-    margin-top: 30px;
-    color: #fff;
-  }
-
-  table {
-    width: 90%;
-    max-width: 800px;
-    margin-top: 20px;
-    border-collapse: collapse;
-    color: #fff;
-  }
-
-  th, td {
-    padding: 8px 12px;
-    border: 1px solid #444;
-  }
-
-  th {
-    background-color: #222;
-  }
-
-  tr:hover {
-    background-color: #333;
-    cursor: pointer;
-  }
-</style>
+  </style>
 </head>
 <body>
+  <div class="app">
+    <main class="viewer" id="viewer">
+      <iframe id="videoFrame" allowfullscreen></iframe>
 
-<!-- Navigation arrows -->
-<div class="nav-arrows">
-  <button id="prevBtn" class="arrow-btn" title="Previous">⬅️</button>
-  <button id="nextBtn" class="arrow-btn" title="Next">➡️</button>
-</div>
+      <div class="actions" id="actions">
+        <div class="action-btn">
+          <button id="likeBtn" aria-label="Like">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="count" id="likeCount">0</span>
+          </button>
+        </div>
 
-<!-- Video display -->
-<div class="video-wrapper">
-  <video id="mainVideo" controls autoplay muted loop>
-    <source src="" type="video/mp4" />
-    Your browser does not support HTML5 video.
-  </video>
-  <!-- Action buttons -->
-  <div class="actions">
-    <button class="action-btn" title="Like">❤️</button>
-    <button class="action-btn" title="Comment">💬</button>
-    <button class="action-btn" title="Share">🔗</button>
-    <button class="action-btn" title="More">⋮</button>
+        <div class="action-btn">
+          <button id="commentBtn" aria-label="Comment">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="count" id="commentCount">0</span>
+          </button>
+        </div>
+
+        <div class="action-btn">
+          <button id="shareBtn" aria-label="Share">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v14"/><path d="M7 8l5-5 5 5"/></svg>
+            <span class="count">Share</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="meta" id="meta">
+        <h3 id="title">Sample Short #1</h3>
+        <p id="description">@creator · YouTube Shorts Embed</p>
+      </div>
+    </main>
+
+    <div class="navside" id="navside">
+      <div class="nav-arrow" id="upArrow" title="Previous (ArrowUp)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 15l-6-6-6 6"/></svg>
+      </div>
+      <div style="height:24px"></div>
+      <div class="nav-arrow" id="downArrow" title="Next (ArrowDown)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
   </div>
-  <!-- Info overlay -->
-  <div class="bottom-info" id="videoInfo">
-    <div class="username" id="videoTitle">Title</div>
-    <div class="caption" id="videoDescription">Description</div>
-    <div style="font-size:12px;">Likes: <span id="likeCount">0</span> | Comments: <span id="commentCount">0</span></div>
+
+  <div class="modal" id="commentModal">
+    <div class="sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <strong>Comments</strong>
+        <button id="closeComments" style="background:none;border:none;color:var(--muted);cursor:pointer">Close</button>
+      </div>
+      <div class="comments" id="commentsList"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <input id="commentInput" placeholder="Add a comment..." style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#fff" />
+        <button id="postComment" style="padding:10px 12px;border-radius:8px;background:var(--accent);border:none;color:#fff;cursor:pointer">Post</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- Video list table -->
-<h2 style="color:#fff;">Video List</h2>
-<table id="videoTable">
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Description</th>
-      <th>Likes</th>
-      <th>Comments</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <script>
+    // Paste your Shorts links here
+    const videos = [
+      {src: 'https://youtube.com/shorts/KSkvJS-q3Hc?si=H1WoKSDs3adDU8yu' title:'rehearsing', description:'cool'},
+      {src: 'https://youtube.com/shorts/Tjp_KddttEQ?si=CxHAf0wcSHhdG_tP', title:'Short #2', description:'Second YouTube short'},
+    ];
 
-<script>
-  // List of videos with info
-  const videos = [
-    {
-      url: "https://www.w3schools.com/html/mov_bbb.mp4",
-      title: "Dantes' Worst Day",
-      description: "Dantes got the worst day 😮",
-      likes: 123,
-      comments: 45
-    },
-    {
-      url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-      title: "Bunny's Adventure",
-      description: "Big Bunny in the wild!",
-      likes: 456,
-      comments: 78
-    },
-    {
-      url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-      title: "Another Bunny Video",
-      description: "Bunny doing funny stuff!",
-      likes: 789,
-      comments: 101
+    let index = 0;
+    const frame = document.getElementById('videoFrame');
+    const titleEl = document.getElementById('title');
+    const descEl = document.getElementById('description');
+    const likeBtn = document.getElementById('likeBtn');
+    const likeCountEl = document.getElementById('likeCount');
+    const commentBtn = document.getElementById('commentBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const upArrow = document.getElementById('upArrow');
+    const downArrow = document.getElementById('downArrow');
+    const commentModal = document.getElementById('commentModal');
+    const commentsList = document.getElementById('commentsList');
+    const commentInput = document.getElementById('commentInput');
+    const postComment = document.getElementById('postComment');
+    const closeComments = document.getElementById('closeComments');
+
+    const state = videos.map(v=>({likes:0, comments:[], ...v}));
+
+    function toEmbed(url){
+      const idMatch = url.match(/shorts\/([\w-]+)/) || url.match(/v=([\w-]+)/);
+      if(!idMatch) return '';
+      return `https://www.youtube.com/embed/${idMatch[1]}?autoplay=1&mute=1`;
     }
-  ];
 
-  let currentIndex = 0;
+    function loadVideo(i){
+      index = (i + state.length) % state.length;
+      const s = state[index];
+      frame.src = toEmbed(s.src);
+      titleEl.textContent = s.title;
+      descEl.textContent = s.description;
+      likeCountEl.textContent = s.likes;
+      commentsList.innerHTML = '';
+      s.comments.forEach(c=>{
+        const div = document.createElement('div');
+        div.className='comment';
+        div.textContent=c;
+        commentsList.appendChild(div);
+      });
+    }
 
-  const mainVideo = document.getElementById('mainVideo');
-  const source = mainVideo.querySelector("source");
-  const titleEl = document.getElementById('videoTitle');
-  const descEl = document.getElementById('videoDescription');
-  const likeEl = document.getElementById('likeCount');
-  const commentEl = document.getElementById('commentCount');
+    loadVideo(0);
 
-  const tbody = document.querySelector("#videoTable tbody");
+    function nextVideo(){ loadVideo(index+1); }
+    function prevVideo(){ loadVideo(index-1); }
 
-  // Generate table rows
-  videos.forEach((video, index) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${video.title}</td>
-      <td>${video.description}</td>
-      <td>${video.likes}</td>
-      <td>${video.comments}</td>
-    `;
-    row.addEventListener("click", () => {
-      currentIndex = index;
-      updateVideo();
+    downArrow.addEventListener('click', nextVideo);
+    upArrow.addEventListener('click', prevVideo);
+    document.addEventListener('keydown', e=>{ if(e.key==='ArrowDown') nextVideo(); if(e.key==='ArrowUp') prevVideo(); });
+
+    likeBtn.addEventListener('click', ()=>{
+      state[index].likes++;
+      likeCountEl.textContent = state[index].likes;
+      likeBtn.classList.add('like-anim');
+      setTimeout(()=>likeBtn.classList.remove('like-anim'),500);
     });
-    tbody.appendChild(row);
-  });
 
-  const updateVideo = () => {
-    const v = videos[currentIndex];
-    source.src = v.url;
-    mainVideo.load();
-    mainVideo.play();
-    // Update info display
-    document.getElementById('videoTitle').textContent = v.title;
-    document.getElementById('videoDescription').textContent = v.description;
-    likeEl.textContent = v.likes;
-    commentEl.textContent = v.comments;
-
-    // Highlight selected row
-    document.querySelectorAll("#videoTable tr").forEach((row, idx) => {
-      row.classList.toggle("selected", idx === currentIndex);
+    commentBtn.addEventListener('click', ()=>{ commentModal.classList.add('open'); });
+    closeComments.addEventListener('click', ()=>{ commentModal.classList.remove('open'); });
+    postComment.addEventListener('click', ()=>{
+      const text = commentInput.value.trim();
+      if(!text) return;
+      state[index].comments.push(text);
+      const div=document.createElement('div');div.className='comment';div.textContent=text;commentsList.prepend(div);
+      document.getElementById('commentCount').textContent=state[index].comments.length;
+      commentInput.value='';
     });
-  };
 
-  document.getElementById('prevBtn').addEventListener('click', () => {
-    currentIndex = (currentIndex - 1 + videos.length) % videos.length;
-    updateVideo();
-  });
-  document.getElementById('nextBtn').addEventListener('click', () => {
-    currentIndex = (currentIndex + 1) % videos.length;
-    updateVideo();
-  });
+    shareBtn.addEventListener('click', async ()=>{
+      const url = state[index].src;
+      if(navigator.share){
+        try{ await navigator.share({title: state[index].title, url}); }catch(e){}
+      }else{
+        await navigator.clipboard.writeText(url);
+        alert('Link copied to clipboard:\n' + url);
+      }
+    });
 
-  // Initialize with first video
-  if (videos.length > 0) {
-    updateVideo();
-  }
-</script>
-
+    // swipe
+    (function(){
+      let startY=null;
+      document.getElementById('viewer').addEventListener('touchstart',e=>{ startY=e.changedTouches[0].clientY });
+      document.getElementById('viewer').addEventListener('touchend',e=>{
+        if(startY===null) return;
+        const dy=e.changedTouches[0].clientY-startY;
+        if(Math.abs(dy)>50){ if(dy<0) nextVideo(); else prevVideo(); }
+        startY=null;
+      });
+    })();
+  </script>
 </body>
 </html>
